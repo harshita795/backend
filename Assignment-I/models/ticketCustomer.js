@@ -5,17 +5,9 @@ const { ticket } = require("./ticket.js");
 const ticketCustomer = sequelize.define("ticketCustomer", {
   ticketId: {
     type: DataTypes.INTEGER,
-    references: {
-      model: ticket,
-      key: "id",
-    },
   },
   customerId: {
     type: DataTypes.INTEGER,
-    references: {
-      model: customer,
-      key: "id",
-    },
   },
 });
 
