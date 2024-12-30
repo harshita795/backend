@@ -176,9 +176,27 @@ app.get("/tickets/sort-by-priority", async (req, res) => {
 
 app.post("/tickets/new", async (req, res) => {
   try {
-    const newTicket = req.body;
-    const thisTicket = await ticket.create(newTicket);
-    return res.status(200).json({ tickets: thisTicket });
+    const { title, description, status, priority, customerId, agentId } =
+      req.body;
+
+    const newTicket = await ticket.create({
+      title,
+      description,
+      status,
+      priority,
+    });
+
+    if (customerId) {
+      await ticketCustomer.create({ ticketId: newTicket.id, customerId });
+    }
+
+    if (agentId) {
+      await ticketAgent.create({ ticketId: newTicket.id, agentId });
+    }
+
+    const ticketDetails = await getTicketDetails(newTicket);
+
+    return res.status(201).json({ ticket: ticketDetails });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -207,7 +225,7 @@ app.post("/tickets/update/:id", async (req, res) => {
 
 app.post("/tickets/delete", async (req, res) => {
   try {
-    const id = req.body;
+    const { id } = req.body;
     const tickets = await ticket.destroy({
       where: { id },
     });
