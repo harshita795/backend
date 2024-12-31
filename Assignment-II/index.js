@@ -137,6 +137,31 @@ app.get("/employees/:id", async (req, res) => {
   }
 });
 
+app.get("/employees/department/:departmentId", async (req, res) => {
+  try {
+    const departmentId = req.params.departmentId;
+    const empDeptRecords = await employeeDepartment.findAll({
+      where: { departmentId },
+    });
+
+    const employees = [];
+
+    for (const empDept of empDeptRecords) {
+      const employeeData = await employee.findOne({
+        where: { id: empDept.employeeId },
+      });
+
+      if (employeeData) {
+        const details = await getEmployeeDetails(employeeData);
+        employees.push(details);
+      }
+    }
+    res.status(200).json({ employees: employees });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(3000, () => {
   console.log(`Server is running at port 3000`);
 });
