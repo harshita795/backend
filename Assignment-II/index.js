@@ -162,6 +162,53 @@ app.get("/employees/department/:departmentId", async (req, res) => {
   }
 });
 
+app.get("/employees/role/:roleId", async (req, res) => {
+  try {
+    const roleId = req.params.roleId;
+    const empRoleRecord = await employeeRole.findAll({
+      where: { roleId },
+    });
+
+    const employees = [];
+
+    for (const empRole of empRoleRecord) {
+      const employeeData = await employee.findOne({
+        where: { id: empRole.employeeId },
+      });
+
+      if (employeeData) {
+        const details = await getEmployeeDetails(employeeData);
+        employees.push(details);
+      }
+    }
+
+    res.status(200).json({ employees: employees });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/employees/sort-by-name", async (req, res) => {
+  try {
+    const inOrder = req.query.order || "ASC";
+    const employees = await employee.findAll({
+      order: [["name", inOrder]],
+    });
+
+    const employeeDetails = [];
+
+    for (let emp of employees) {
+      const details = await getEmployeeDetails(emp);
+      console.log(emp);
+      employeeDetails.push(details);
+    }
+
+    res.status(200).json({ employees: employeeDetails });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(3000, () => {
   console.log(`Server is running at port 3000`);
 });
